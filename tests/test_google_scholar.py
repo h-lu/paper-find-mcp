@@ -39,7 +39,7 @@ class TestGoogleScholarSearcher(unittest.TestCase):
             self.searcher.download_pdf("some_id", "./downloads")
 
     def test_read_paper_not_supported(self):
-        message = self.searcher.read_paper("some_id")
+        message = self.searcher.read_paper("some_id", "./downloads")
         self.assertIn("Google Scholar doesn't support direct paper reading", message)
 
 if __name__ == '__main__':

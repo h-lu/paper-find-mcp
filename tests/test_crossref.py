@@ -87,7 +87,7 @@ class TestCrossRefSearcher(unittest.TestCase):
         self.assertIn("CrossRef does not provide direct PDF downloads", str(context.exception))
 
     def test_read_paper_not_supported(self):
-        message = self.searcher.read_paper("10.1038/nature12373")
+        message = self.searcher.read_paper("10.1038/nature12373", "./downloads")
         self.assertIn("CrossRef papers cannot be read directly", message)
         self.assertIn("metadata and abstracts are available", message)
 

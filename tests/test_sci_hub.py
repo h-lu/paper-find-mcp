@@ -27,7 +27,7 @@ class TestSciHubFetcher(unittest.TestCase):
     def setUp(self):
         # Create temporary directory for downloads
         self.test_dir = tempfile.mkdtemp(prefix="sci_hub_test_")
-        self.fetcher = SciHubFetcher(output_dir=self.test_dir)
+        self.fetcher = SciHubFetcher()
 
     def tearDown(self):
         # Clean up temporary directory
@@ -37,21 +37,21 @@ class TestSciHubFetcher(unittest.TestCase):
     def test_init(self):
         """Test initialization of SciHubFetcher"""
         self.assertEqual(self.fetcher.base_url, "https://sci-hub.se")
-        self.assertTrue(os.path.exists(self.test_dir))
         self.assertIsNotNone(self.fetcher.session)
+        self.assertEqual(self.fetcher.timeout, 30)
 
     def test_init_custom_url(self):
         """Test initialization with custom URL"""
-        custom_fetcher = SciHubFetcher(base_url="https://sci-hub.ru/", output_dir=self.test_dir)
+        custom_fetcher = SciHubFetcher(base_url="https://sci-hub.ru/")
         self.assertEqual(custom_fetcher.base_url, "https://sci-hub.ru")
 
     def test_download_pdf_empty_query(self):
         """Test download with empty query"""
-        result = self.fetcher.download_pdf("")
+        result = self.fetcher.download_pdf("", save_path=self.test_dir)
         # Now returns error string instead of None
         self.assertTrue(result.startswith("Error"))
 
-        result = self.fetcher.download_pdf("   ")
+        result = self.fetcher.download_pdf("   ", save_path=self.test_dir)
         self.assertTrue(result.startswith("Error"))
 
     @unittest.skipUnless(check_sci_hub_accessible(), "Sci-Hub not accessible")
@@ -70,9 +70,9 @@ class TestSciHubFetcher(unittest.TestCase):
         
         for doi in test_dois:
             print(f"\nTesting PDF download for DOI: {doi}")
-            result = self.fetcher.download_pdf(doi)
+            result = self.fetcher.download_pdf(doi, save_path=self.test_dir)
             
-            if result:
+            if result and not result.startswith("Error"):
                 # Download successful
                 self.assertIsInstance(result, str)
                 self.assertTrue(os.path.exists(result))
@@ -98,10 +98,10 @@ class TestSciHubFetcher(unittest.TestCase):
         invalid_doi = "10.1234/invalid.doi.123456789"
         
         print(f"\nTesting download for invalid DOI: {invalid_doi}")
-        result = self.fetcher.download_pdf(invalid_doi)
+        result = self.fetcher.download_pdf(invalid_doi, save_path=self.test_dir)
         
-        # Should return None for invalid DOI
-        self.assertIsNone(result)
+        # Should return error string for invalid DOI
+        self.assertTrue(result.startswith("Error"))
 
     def test_generate_filename(self):
         """Test filename generation"""
@@ -162,21 +162,25 @@ class TestSciHubFetcher(unittest.TestCase):
         self.assertIn('Mozilla', user_agent)
 
     def test_output_directory_creation(self):
-        """Test that output directory is created"""
+        """Test that output directory is created during download"""
         new_dir = os.path.join(self.test_dir, "subdir", "nested")
-        fetcher = SciHubFetcher(output_dir=new_dir)
+        # Directory should be created when download_pdf is called
+        result = self.fetcher.download_pdf("", save_path=new_dir)
+        # Even with empty DOI (which returns error), directory should be created
+        # Actually empty DOI returns early before directory creation, so we test with invalid DOI
+        result = self.fetcher.download_pdf("10.invalid/test", save_path=new_dir)
         self.assertTrue(os.path.exists(new_dir))
 
     @unittest.skipUnless(check_sci_hub_accessible(), "Sci-Hub not accessible")
     def test_error_handling(self):
         """Test error handling for various scenarios"""
         # Test with clearly invalid/malformed identifier
-        result = self.fetcher.download_pdf("this-is-definitely-not-a-valid-doi-or-identifier-12345")
+        result = self.fetcher.download_pdf("this-is-definitely-not-a-valid-doi-or-identifier-12345", save_path=self.test_dir)
         # Note: Sci-Hub might still return something, so we just check it doesn't crash
         self.assertIsInstance(result, str)
         
         # Test with empty string - now returns error string
-        result = self.fetcher.download_pdf("")
+        result = self.fetcher.download_pdf("", save_path=self.test_dir)
         self.assertTrue(result.startswith("Error"))
 
 
