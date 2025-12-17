@@ -922,6 +922,8 @@ async def download_scihub(doi: str, save_path: Optional[str] = None) -> str:
     Example:
         download_scihub("10.1038/nature12373")  # 2013 Nature paper
     """
+    if save_path is None:
+        save_path = DEFAULT_DOWNLOAD_PATH
     try:
         return SCIHUB.download_pdf(doi, save_path)
     except Exception as e:
@@ -954,6 +956,8 @@ async def read_scihub_paper(doi: str, save_path: Optional[str] = None) -> str:
     Example:
         read_scihub_paper("10.1038/nature12373")
     """
+    if save_path is None:
+        save_path = DEFAULT_DOWNLOAD_PATH
     try:
         return SCIHUB.read_paper(doi, save_path)
     except Exception as e:
