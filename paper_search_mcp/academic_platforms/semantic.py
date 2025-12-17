@@ -332,26 +332,52 @@ class SemanticSearcher(PaperSource):
         if not paper.pdf_url:
             return f"Error: No PDF URL available for paper {paper_id}"
         
-        try:
-            response = requests.get(paper.pdf_url, timeout=self.timeout)
-            response.raise_for_status()
-            
-            os.makedirs(save_path, exist_ok=True)
-            
-            # 清理文件名
-            safe_id = paper_id.replace('/', '_').replace(':', '_')
-            filename = f"semantic_{safe_id}.pdf"
-            pdf_path = os.path.join(save_path, filename)
-            
-            with open(pdf_path, 'wb') as f:
-                f.write(response.content)
-            
-            logger.info(f"PDF downloaded: {pdf_path}")
-            return pdf_path
-            
-        except Exception as e:
-            logger.error(f"PDF download failed: {e}")
-            return f"Error downloading PDF: {e}"
+        # 准备保存路径
+        os.makedirs(save_path, exist_ok=True)
+        safe_id = paper_id.replace('/', '_').replace(':', '_')
+        filename = f"semantic_{safe_id}.pdf"
+        pdf_path = os.path.join(save_path, filename)
+        
+        # 下载超时设置：连接超时 10 秒，读取超时 120 秒
+        download_timeout = (10, 120)
+        
+        for attempt in range(self.max_retries):
+            try:
+                # 使用 session 并启用流式下载
+                response = self.session.get(
+                    paper.pdf_url, 
+                    timeout=download_timeout,
+                    stream=True
+                )
+                response.raise_for_status()
+                
+                # 流式写入文件
+                with open(pdf_path, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        if chunk:
+                            f.write(chunk)
+                
+                logger.info(f"PDF downloaded: {pdf_path}")
+                return pdf_path
+                
+            except requests.exceptions.Timeout as e:
+                logger.warning(f"Download timeout (attempt {attempt + 1}/{self.max_retries}): {e}")
+                if attempt < self.max_retries - 1:
+                    wait_time = 2 ** attempt
+                    logger.info(f"Retrying in {wait_time}s...")
+                    time.sleep(wait_time)
+                else:
+                    return f"Error downloading PDF: Timeout after {self.max_retries} attempts"
+                    
+            except requests.exceptions.RequestException as e:
+                logger.warning(f"Download failed (attempt {attempt + 1}/{self.max_retries}): {e}")
+                if attempt < self.max_retries - 1:
+                    wait_time = 2 ** attempt
+                    time.sleep(wait_time)
+                else:
+                    return f"Error downloading PDF: {e}"
+        
+        return f"Error downloading PDF: Failed after {self.max_retries} attempts"
 
     def read_paper(self, paper_id: str, save_path: str) -> str:
         """下载并提取论文文本

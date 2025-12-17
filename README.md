@@ -74,7 +74,8 @@ pip install -e .
       "env": {
         "SEMANTIC_SCHOLAR_API_KEY": "",
         "CROSSREF_MAILTO": "your_email@example.com",
-        "NCBI_API_KEY": ""
+        "NCBI_API_KEY": "",
+        "PAPER_DOWNLOAD_PATH": "~/paper_downloads"
       }
     }
   }
@@ -92,7 +93,8 @@ pip install -e .
       "env": {
         "SEMANTIC_SCHOLAR_API_KEY": "",
         "CROSSREF_MAILTO": "your_email@example.com",
-        "NCBI_API_KEY": ""
+        "NCBI_API_KEY": "",
+        "PAPER_DOWNLOAD_PATH": "~/paper_downloads"
       }
     }
   }
