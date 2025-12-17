@@ -63,6 +63,8 @@ pip install -e .
 
 编辑 `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
 
+**使用 uv (推荐):**
+
 ```json
 {
   "mcpServers": {
@@ -79,9 +81,23 @@ pip install -e .
 }
 ```
 
-### 配置 Cursor
+**使用 Python:**
 
-在 Cursor 设置中添加 MCP 服务器配置。
+```json
+{
+  "mcpServers": {
+    "paper_search_server": {
+      "command": "python",
+      "args": ["-m", "paper_search_mcp.server"],
+      "env": {
+        "SEMANTIC_SCHOLAR_API_KEY": "",
+        "CROSSREF_MAILTO": "your_email@example.com",
+        "NCBI_API_KEY": ""
+      }
+    }
+  }
+}
+```
 
 ---
 
