@@ -173,7 +173,7 @@ class BioRxivSearcher(PaperSource):
             logger.warning(f"Failed to parse item: {e}")
             return None
 
-    def download_pdf(self, paper_id: str, save_path: str = "./downloads") -> str:
+    def download_pdf(self, paper_id: str, save_path: str) -> str:
         """下载 PDF
         
         Args:
@@ -210,7 +210,7 @@ class BioRxivSearcher(PaperSource):
             logger.error(f"PDF download failed: {e}")
             return f"Error downloading PDF: {e}"
 
-    def read_paper(self, paper_id: str, save_path: str = "./downloads") -> str:
+    def read_paper(self, paper_id: str, save_path: str) -> str:
         """下载并提取论文文本
         
         Args:

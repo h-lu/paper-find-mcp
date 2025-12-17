@@ -231,7 +231,7 @@ class IACRSearcher(PaperSource):
             logger.error(f"PDF download error: {e}")
             return f"Error downloading PDF: {e}"
 
-    def read_paper(self, paper_id: str, save_path: str = "./downloads") -> str:
+    def read_paper(self, paper_id: str, save_path: str) -> str:
         """下载并提取 IACR 论文文本
 
         使用 PyMuPDF4LLM 提取 Markdown 格式。

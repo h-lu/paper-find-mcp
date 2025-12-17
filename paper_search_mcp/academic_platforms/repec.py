@@ -568,7 +568,7 @@ class RePECSearcher(PaperSource):
         
         return papers[:max_results]
     
-    def download_pdf(self, paper_id: str, save_path: str = "./downloads") -> str:
+    def download_pdf(self, paper_id: str, save_path: str) -> str:
         """RePEc/IDEAS 不支持直接 PDF 下载
         
         RePEc 是元数据索引，不托管 PDF 文件。
@@ -590,7 +590,7 @@ class RePECSearcher(PaperSource):
             "3. Many NBER/Fed working papers are freely available at source"
         )
     
-    def read_paper(self, paper_id: str, save_path: str = "./downloads") -> str:
+    def read_paper(self, paper_id: str, save_path: str) -> str:
         """RePEc/IDEAS 不支持直接论文阅读
         
         Args:

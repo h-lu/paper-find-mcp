@@ -335,7 +335,7 @@ class PubMedSearcher(PaperSource):
             "or check if the paper is available on PubMed Central (PMC)."
         )
 
-    def read_paper(self, paper_id: str, save_path: str = "./downloads") -> str:
+    def read_paper(self, paper_id: str, save_path: str) -> str:
         """尝试读取 PubMed 论文（不支持）
         
         Returns:

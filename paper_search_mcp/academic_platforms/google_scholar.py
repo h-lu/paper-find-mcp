@@ -153,7 +153,7 @@ class GoogleScholarSearcher(PaperSource):
             "Please use the paper URL to access the publisher's website."
         )
 
-    def read_paper(self, paper_id: str, save_path: str = "./downloads") -> str:
+    def read_paper(self, paper_id: str, save_path: str) -> str:
         """
         Google Scholar doesn't support direct paper reading
         

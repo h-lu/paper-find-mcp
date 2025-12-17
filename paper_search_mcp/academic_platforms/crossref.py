@@ -319,7 +319,7 @@ class CrossRefSearcher(PaperSource):
                   "To access the full text, please use the paper's DOI or URL to visit the publisher's website.")
         raise NotImplementedError(message)
     
-    def read_paper(self, paper_id: str, save_path: str = "./downloads") -> str:
+    def read_paper(self, paper_id: str, save_path: str) -> str:
         """
         CrossRef doesn't provide direct paper content access.
         

@@ -113,7 +113,7 @@ class ArxivSearcher(PaperSource):
                 
         return papers
 
-    def download_pdf(self, paper_id: str, save_path: str = "./downloads") -> str:
+    def download_pdf(self, paper_id: str, save_path: str) -> str:
         """下载 arXiv 论文 PDF
         
         Args:
@@ -158,7 +158,7 @@ class ArxivSearcher(PaperSource):
     def read_paper(
         self, 
         paper_id: str, 
-        save_path: str = "./downloads",
+        save_path: str,
         output_format: Literal["markdown", "text"] = "markdown",
         table_strategy: Literal["lines_strict", "lines", "text", "explicit"] = "lines_strict",
         pages: Optional[List[int]] = None

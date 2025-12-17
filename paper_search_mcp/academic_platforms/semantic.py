@@ -315,7 +315,7 @@ class SemanticSearcher(PaperSource):
             logger.error(f"Failed to get paper details: {e}")
             return None
 
-    def download_pdf(self, paper_id: str, save_path: str = "./downloads") -> str:
+    def download_pdf(self, paper_id: str, save_path: str) -> str:
         """下载论文 PDF
         
         Args:
@@ -353,7 +353,7 @@ class SemanticSearcher(PaperSource):
             logger.error(f"PDF download failed: {e}")
             return f"Error downloading PDF: {e}"
 
-    def read_paper(self, paper_id: str, save_path: str = "./downloads") -> str:
+    def read_paper(self, paper_id: str, save_path: str) -> str:
         """下载并提取论文文本
         
         使用 PyMuPDF4LLM 提取 Markdown 格式。
