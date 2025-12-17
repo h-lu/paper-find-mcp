@@ -1,69 +1,71 @@
-# 论文搜索 MCP 服务器
+# Paper Search MCP Server
 
-一个用于搜索和下载学术论文的 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 服务器，支持多个学术平台。专为 Claude Desktop、Cursor 等 LLM 工具设计。
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for searching and downloading academic papers from multiple platforms. Designed for LLM tools like Claude Desktop, Cursor, etc.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg) ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
 
----
-
-## 支持的平台
-
-### 核心平台
-
-| 平台 | 搜索 | 下载 | 阅读 | 说明 |
-|------|:----:|:----:|:----:|------|
-| **arXiv** | ✅ | ✅ | ✅ | 预印本: 物理、数学、计算机、统计、生物、金融 |
-| **Semantic Scholar** | ✅ | ✅ | ✅ | 通用学术搜索，2亿+论文，AI驱动 |
-| **PubMed** | ✅ | ❌ | ❌ | 生物医学文献 |
-| **bioRxiv** | ✅ | ✅ | ✅ | 生物学预印本 |
-| **medRxiv** | ✅ | ✅ | ✅ | 医学预印本 |
-| **CrossRef** | ✅ | ❌ | ❌ | DOI 元数据，1.5亿+记录 |
-| **IACR** | ✅ | ✅ | ✅ | 密码学论文 |
-| **Google Scholar** | ✅ | ❌ | ❌ | 全学科搜索（网页抓取） |
-| **RePEc/IDEAS** | ✅ | ❌ | ❌ | 经济学论文库，450万+条目 |
-| **Sci-Hub** | ❌ | ✅ | ✅ | 下载 2023 年前的付费论文 |
-
-### RePEc/IDEAS 特色功能
-
-RePEc 是最大的开放经济学文献库，支持丰富的搜索选项：
-
-**搜索字段**: 全文 / 摘要 / 关键词 / 标题 / 作者
-
-**排序方式**: 相关性 / 最新 / 最早 / 被引次数 / 最新且相关
-
-**文档类型**: 期刊文章 / 工作论文 / 书籍章节 / 书籍
-
-**机构/期刊过滤**:
-| 类别 | 可选值 |
-|------|--------|
-| 研究机构 | `nber`, `imf`, `worldbank`, `ecb`, `bis`, `cepr`, `iza` |
-| 美联储 | `fed`, `fed_ny`, `fed_chicago`, `fed_stlouis`, `fed_sf` |
-| Top 5 期刊 | `aer`, `jpe`, `qje`, `econometrica`, `restud` |
-| 其他期刊 | `jfe`, `jme`, `aej_macro`, `aej_micro`, `aej_applied` |
+**[中文文档](README_CN.md)**
 
 ---
 
-## 快速开始
+## Supported Platforms
 
-### 安装
+### Core Platforms
+
+| Platform | Search | Download | Read | Description |
+|----------|:------:|:--------:|:----:|-------------|
+| **arXiv** | ✅ | ✅ | ✅ | Preprints: Physics, Math, CS, Stats, Biology, Finance |
+| **Semantic Scholar** | ✅ | ✅ | ✅ | General academic search, 200M+ papers, AI-powered |
+| **PubMed** | ✅ | ❌ | ❌ | Biomedical literature |
+| **bioRxiv** | ✅ | ✅ | ✅ | Biology preprints |
+| **medRxiv** | ✅ | ✅ | ✅ | Medical preprints |
+| **CrossRef** | ✅ | ❌ | ❌ | DOI metadata, 150M+ records |
+| **IACR** | ✅ | ✅ | ✅ | Cryptography papers |
+| **Google Scholar** | ✅ | ❌ | ❌ | All-discipline search (web scraping) |
+| **RePEc/IDEAS** | ✅ | ❌ | ❌ | Economics paper library, 4.5M+ items |
+| **Sci-Hub** | ❌ | ✅ | ✅ | Download paywalled papers (pre-2023) |
+
+### RePEc/IDEAS Features
+
+RePEc is the largest open economics bibliography, with rich search options:
+
+**Search Fields**: Full text / Abstract / Keywords / Title / Author
+
+**Sort Options**: Relevance / Newest / Oldest / Citations / Recent & Relevant
+
+**Document Types**: Journal Articles / Working Papers / Book Chapters / Books
+
+**Institution/Journal Filters**:
+| Category | Options |
+|----------|---------|
+| Research Institutions | `nber`, `imf`, `worldbank`, `ecb`, `bis`, `cepr`, `iza` |
+| Federal Reserve | `fed`, `fed_ny`, `fed_chicago`, `fed_stlouis`, `fed_sf` |
+| Top 5 Journals | `aer`, `jpe`, `qje`, `econometrica`, `restud` |
+| Other Journals | `jfe`, `jme`, `aej_macro`, `aej_micro`, `aej_applied` |
+
+---
+
+## Quick Start
+
+### Installation
 
 ```bash
-# 克隆仓库
+# Clone the repository
 git clone https://github.com/h-lu/paper-search-mcp.git
 cd paper-search-mcp
 
-# 使用 uv 安装 (推荐)
+# Install with uv (recommended)
 uv pip install -e .
 
-# 或使用 pip
+# Or use pip
 pip install -e .
 ```
 
-### 配置 Claude Desktop
+### Configure Claude Desktop
 
-编辑 `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
+Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
 
-**使用 uv (推荐):**
+**Using uv (recommended):**
 
 ```json
 {
@@ -82,7 +84,7 @@ pip install -e .
 }
 ```
 
-**使用 Python:**
+**Using Python:**
 
 ```json
 {
@@ -103,144 +105,144 @@ pip install -e .
 
 ---
 
-## 使用指南
+## Usage Guide
 
-### 按学科选择工具
+### Choose Tools by Discipline
 
 ```
-通用学术搜索      → search_semantic 或 search_crossref
-计算机/物理预印本  → search_arxiv
-生物医学          → search_pubmed + download_scihub(doi)
-经济学            → search_repec (支持 NBER, IMF, Fed, AER 等)
-密码学            → search_iacr
-下载付费论文       → download_scihub(doi) [2023年前]
+General academic search    → search_semantic or search_crossref
+CS/Physics preprints       → search_arxiv
+Biomedical                 → search_pubmed + download_scihub(doi)
+Economics                  → search_repec (supports NBER, IMF, Fed, AER, etc.)
+Cryptography               → search_iacr
+Download paywalled papers  → download_scihub(doi) [pre-2023]
 ```
 
-### 典型工作流
+### Typical Workflow
 
 ```python
-# 1. 搜索论文
+# 1. Search for papers
 papers = search_semantic("climate change agriculture", max_results=5)
 
-# 2. 获取 DOI
+# 2. Get DOI
 doi = papers[0]["doi"]
 
-# 3. 通过 Sci-Hub 下载 (旧论文)
+# 3. Download via Sci-Hub (older papers)
 pdf_path = download_scihub(doi)
 
-# 4. 阅读全文
+# 4. Read full text
 text = read_scihub_paper(doi)
 ```
 
-### RePEc 经济学搜索示例
+### RePEc Economics Search Examples
 
 ```python
-# 搜索 NBER 工作论文
+# Search NBER working papers
 search_repec("inflation expectations", series='nber')
 
-# 搜索 AER 期刊文章，按最新排序
+# Search AER journal articles, sorted by newest
 search_repec("causal inference", series='aer', sort_by='newest')
 
-# 搜索美联储论文，限定年份
+# Search Fed papers, with year filter
 search_repec("monetary policy", series='fed', year_from=2020)
 
-# 按作者搜索
+# Search by author
 search_repec("Acemoglu", search_field='author')
 
-# 获取论文详情（包含完整摘要）
+# Get paper details (with full abstract)
 get_repec_paper("https://ideas.repec.org/p/nbr/nberwo/32000.html")
 ```
 
 ---
 
-## 完整工具列表
+## Complete Tool List
 
-### 搜索工具
+### Search Tools
 
-| 工具 | 说明 |
-|------|------|
-| `search_arxiv` | 搜索 arXiv 预印本 |
-| `search_semantic` | Semantic Scholar 通用搜索 |
-| `search_crossref` | CrossRef DOI 元数据搜索 |
-| `search_pubmed` | PubMed 生物医学搜索 |
-| `search_biorxiv` | bioRxiv 生物学预印本 |
-| `search_medrxiv` | medRxiv 医学预印本 |
-| `search_iacr` | IACR 密码学论文 |
-| `search_google_scholar` | Google Scholar 搜索 |
-| `search_repec` | RePEc/IDEAS 经济学搜索 |
+| Tool | Description |
+|------|-------------|
+| `search_arxiv` | Search arXiv preprints |
+| `search_semantic` | Semantic Scholar general search |
+| `search_crossref` | CrossRef DOI metadata search |
+| `search_pubmed` | PubMed biomedical search |
+| `search_biorxiv` | bioRxiv biology preprints |
+| `search_medrxiv` | medRxiv medical preprints |
+| `search_iacr` | IACR cryptography papers |
+| `search_google_scholar` | Google Scholar search |
+| `search_repec` | RePEc/IDEAS economics search |
 
-### 下载工具
+### Download Tools
 
-| 工具 | 说明 |
-|------|------|
-| `download_arxiv` | 下载 arXiv PDF（免费） |
-| `download_semantic` | 下载开放获取论文 |
-| `download_biorxiv` | 下载 bioRxiv PDF |
-| `download_medrxiv` | 下载 medRxiv PDF |
-| `download_iacr` | 下载 IACR PDF |
-| `download_scihub` | 通过 Sci-Hub 下载 |
+| Tool | Description |
+|------|-------------|
+| `download_arxiv` | Download arXiv PDF (free) |
+| `download_semantic` | Download open access papers |
+| `download_biorxiv` | Download bioRxiv PDF |
+| `download_medrxiv` | Download medRxiv PDF |
+| `download_iacr` | Download IACR PDF |
+| `download_scihub` | Download via Sci-Hub |
 
-### 阅读工具 (PDF → Markdown)
+### Read Tools (PDF → Markdown)
 
-| 工具 | 说明 |
-|------|------|
-| `read_arxiv_paper` | 阅读 arXiv 论文 |
-| `read_semantic_paper` | 阅读 Semantic Scholar 论文 |
-| `read_biorxiv_paper` | 阅读 bioRxiv 论文 |
-| `read_medrxiv_paper` | 阅读 medRxiv 论文 |
-| `read_iacr_paper` | 阅读 IACR 论文 |
-| `read_scihub_paper` | 阅读 Sci-Hub 下载的论文 |
+| Tool | Description |
+|------|-------------|
+| `read_arxiv_paper` | Read arXiv paper |
+| `read_semantic_paper` | Read Semantic Scholar paper |
+| `read_biorxiv_paper` | Read bioRxiv paper |
+| `read_medrxiv_paper` | Read medRxiv paper |
+| `read_iacr_paper` | Read IACR paper |
+| `read_scihub_paper` | Read Sci-Hub downloaded paper |
 
-### 辅助工具
+### Helper Tools
 
-| 工具 | 说明 |
-|------|------|
-| `get_repec_paper` | 获取 RePEc 论文详情（完整摘要） |
-| `get_crossref_paper_by_doi` | 通过 DOI 获取论文元数据 |
-
----
-
-## 环境变量
-
-| 变量 | 用途 | 推荐 |
-|------|------|:----:|
-| `SEMANTIC_SCHOLAR_API_KEY` | 提高 Semantic Scholar 请求限制 | ✅ |
-| `CROSSREF_MAILTO` | CrossRef 礼貌池访问 | ✅ |
-| `NCBI_API_KEY` | 提高 PubMed 请求限制 | 可选 |
-| `SCIHUB_MIRROR` | 自定义 Sci-Hub 镜像 | 可选 |
-| `PAPER_DOWNLOAD_PATH` | PDF 下载目录 (默认: `~/paper_downloads`) | 可选 |
+| Tool | Description |
+|------|-------------|
+| `get_repec_paper` | Get RePEc paper details (full abstract) |
+| `get_crossref_paper_by_doi` | Get paper metadata by DOI |
 
 ---
 
-## 开发
+## Environment Variables
+
+| Variable | Purpose | Recommended |
+|----------|---------|:-----------:|
+| `SEMANTIC_SCHOLAR_API_KEY` | Increase Semantic Scholar rate limit | ✅ |
+| `CROSSREF_MAILTO` | CrossRef polite pool access | ✅ |
+| `NCBI_API_KEY` | Increase PubMed rate limit | Optional |
+| `SCIHUB_MIRROR` | Custom Sci-Hub mirror | Optional |
+| `PAPER_DOWNLOAD_PATH` | PDF download directory (default: `~/paper_downloads`) | Optional |
+
+---
+
+## Development
 
 ```bash
-# 克隆仓库
+# Clone the repository
 git clone https://github.com/openags/paper-search-mcp.git
 cd paper-search-mcp
 
-# 创建虚拟环境
+# Create virtual environment
 uv venv && source .venv/bin/activate
 
-# 安装开发依赖
+# Install dev dependencies
 uv pip install -e .
 
-# 运行测试
+# Run tests
 uv run pytest tests/ -v
 ```
 
 ---
 
-## 许可证
+## License
 
 MIT License
 
-原始代码基于 [paper-search-mcp](https://github.com/openags/paper-search-mcp)  
+Original code based on [paper-search-mcp](https://github.com/openags/paper-search-mcp)  
 Copyright (c) 2025 OPENAGS
 
-修改和增强  
+Modifications and enhancements  
 Copyright (c) 2025 Haibo Lu
 
 ---
 
-🎓 祝研究顺利！
+🎓 Happy researching!
