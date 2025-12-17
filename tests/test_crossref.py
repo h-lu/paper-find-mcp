@@ -98,8 +98,9 @@ class TestCrossRefSearcher(unittest.TestCase):
 
     def test_user_agent_header(self):
         # Test that the session has the correct user agent
-        self.assertIn("paper-search-mcp", self.searcher.session.headers.get('User-Agent', ''))
-        self.assertIn("mailto:", self.searcher.session.headers.get('User-Agent', ''))
+        user_agent = self.searcher.session.headers.get('User-Agent', '')
+        self.assertIn("paper_search_mcp", user_agent)
+        self.assertIn("mailto:", user_agent)
 
 if __name__ == '__main__':
     unittest.main()

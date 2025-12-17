@@ -1,11 +1,21 @@
 # paper_search_mcp/academic_platforms/crossref.py
+"""
+CrossRefSearcher - CrossRef 引用数据库搜索
+
+2025 最佳实践版本：
+- Polite Pool 支持（mailto 参数）
+- 环境变量配置
+- 指数退避重试
+- Session 复用
+"""
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 import requests
 import time
-import random
-from ..paper import Paper
+import os
 import logging
+
+from ..paper import Paper
 
 logger = logging.getLogger(__name__)
 
@@ -21,19 +31,80 @@ class PaperSource:
         raise NotImplementedError
 
 class CrossRefSearcher(PaperSource):
-    """Searcher for CrossRef database papers"""
+    """CrossRef 引用数据库搜索器
+    
+    使用 CrossRef REST API 搜索学术论文元数据。
+    
+    2025 最佳实践：
+    - 使用 mailto 参数进入 "Polite Pool"（更高速率限制）
+    - 设置 User-Agent 便于 CrossRef 联系
+    - 指数退避处理速率限制
+    
+    环境变量：
+    - CROSSREF_MAILTO: 联系邮箱（推荐设置）
+    """
     
     BASE_URL = "https://api.crossref.org"
     
-    # User agent for polite API usage as per CrossRef etiquette
-    USER_AGENT = "paper-search-mcp/0.1.3 (https://github.com/Dragonatorul/paper-search-mcp; mailto:paper-search@example.org)"
-    
-    def __init__(self):
+    def __init__(
+        self,
+        mailto: Optional[str] = None,
+        timeout: int = 30,
+        max_retries: int = 3
+    ):
+        """初始化 CrossRef 搜索器
+        
+        Args:
+            mailto: 联系邮箱（默认从环境变量获取）
+            timeout: 请求超时时间
+            max_retries: 最大重试次数
+        """
+        self.mailto = mailto or os.environ.get('CROSSREF_MAILTO', '')
+        self.timeout = timeout
+        self.max_retries = max_retries
+        
+        # Session 复用
         self.session = requests.Session()
         self.session.headers.update({
-            'User-Agent': self.USER_AGENT,
+            'User-Agent': f'paper_search_mcp/1.0 (mailto:{self.mailto})',
             'Accept': 'application/json'
         })
+        
+        if self.mailto:
+            logger.info(f"Using Polite Pool with mailto: {self.mailto}")
+        else:
+            logger.warning("No CROSSREF_MAILTO set. Consider setting it for better rate limits.")
+
+    def _make_request(
+        self, 
+        url: str, 
+        params: dict,
+        retry_count: int = 0
+    ) -> Optional[requests.Response]:
+        """发送请求，带重试机制"""
+        try:
+            response = self.session.get(url, params=params, timeout=self.timeout)
+            
+            if response.status_code == 429:
+                if retry_count < self.max_retries:
+                    wait_time = (2 ** retry_count) + 1
+                    logger.warning(f"Rate limited (429), retrying in {wait_time}s...")
+                    time.sleep(wait_time)
+                    return self._make_request(url, params, retry_count + 1)
+                logger.error(f"Rate limited after {self.max_retries} retries")
+                return None
+            
+            response.raise_for_status()
+            return response
+            
+        except requests.exceptions.RequestException as e:
+            if retry_count < self.max_retries:
+                wait_time = 2 ** retry_count
+                logger.warning(f"Request failed, retrying in {wait_time}s: {e}")
+                time.sleep(wait_time)
+                return self._make_request(url, params, retry_count + 1)
+            logger.error(f"Request failed: {e}")
+            return None
     
     def search(self, query: str, max_results: int = 10, **kwargs) -> List[Paper]:
         """
@@ -63,19 +134,15 @@ class CrossRefSearcher(PaperSource):
             if 'order' in kwargs:
                 params['order'] = kwargs['order']
                 
-            # Add polite pool parameter
-            params['mailto'] = 'paper-search@example.org'
+            # Polite Pool 参数
+            if self.mailto:
+                params['mailto'] = self.mailto
             
             url = f"{self.BASE_URL}/works"
-            response = self.session.get(url, params=params, timeout=30)
+            response = self._make_request(url, params)
             
-            if response.status_code == 429:
-                # Rate limited - wait and retry once
-                logger.warning("Rate limited by CrossRef API, waiting 2 seconds...")
-                time.sleep(2)
-                response = self.session.get(url, params=params, timeout=30)
-            
-            response.raise_for_status()
+            if not response:
+                return []
             data = response.json()
             
             papers = []

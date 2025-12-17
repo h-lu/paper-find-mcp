@@ -199,54 +199,22 @@ class TestSemanticSearcher(unittest.TestCase):
             self.fail("Could not fetch paper details")
 
     @unittest.skipUnless(check_semantic_accessible(), "Semantic Scholar not accessible")
-    def test_search_with_fetch_details(self):
-        """Test search functionality with fetch_details parameter"""
-        # Test with fetch_details=True (detailed information)
-        print("\nTesting search with fetch_details=True")
-        detailed_papers = self.searcher.search(
-            "cryptography", max_results=2, fetch_details=True
+    def test_search_with_year_filter(self):
+        """Test search functionality with year parameter"""
+        print("\nTesting search with year filter")
+        papers = self.searcher.search(
+            "cryptography", max_results=2, year="2020-2023"
         )
 
-        self.assertIsInstance(detailed_papers, list)
-        self.assertLessEqual(len(detailed_papers), 2)
+        self.assertIsInstance(papers, list)
+        self.assertLessEqual(len(papers), 2)
 
-        if detailed_papers:
-            paper = detailed_papers[0]
+        if papers:
+            paper = papers[0]
             self.assertEqual(paper.source, "semantic")
-
-            # Detailed papers should have more complete information
-            print(f"Detailed paper: {paper.title}")
+            print(f"Paper: {paper.title}")
             print(f"Authors: {len(paper.authors)} authors")
-            print(f"Keywords: {len(paper.keywords)} keywords")
-            print(f"Abstract length: {len(paper.abstract)} chars")
-
-            # Should have keywords and publication info if available
-            if paper.keywords:
-                self.assertIsInstance(paper.keywords, list)
-                print(f"Keywords found: {', '.join(paper.keywords[:3])}...")
-
-            if paper.extra:
-                pub_info = paper.extra.get("publication_info", "")
-                if pub_info:
-                    print(f"Publication info: {pub_info[:50]}...")
-
-        # Test with fetch_details=False (compact information)
-        print("\nTesting search with fetch_details=False")
-        compact_papers = self.searcher.search(
-            "cryptography", max_results=2, fetch_details=False
-        )
-
-        self.assertIsInstance(compact_papers, list)
-        self.assertLessEqual(len(compact_papers), 2)
-
-        if compact_papers:
-            paper = compact_papers[0]
-            self.assertEqual(paper.source, "semantic")
-
-            print(f"Compact paper: {paper.title}")
-            print(f"Authors: {len(paper.authors)} authors")
-            print(f"Categories: {', '.join(paper.categories)}")
-            print(f"Abstract preview length: {len(paper.abstract)} chars")
+            print(f"Abstract length: {len(paper.abstract) if paper.abstract else 0} chars")
 
     @unittest.skipUnless(check_semantic_accessible(), "Semantic Scholar not accessible")
     def test_search_performance_comparison(self):

@@ -1,180 +1,223 @@
-# Paper Search MCP
+# 论文搜索 MCP 服务器
 
-A Model Context Protocol (MCP) server for searching and downloading academic papers from multiple sources, including arXiv, PubMed, bioRxiv, and Sci-Hub (optional). Designed for seamless integration with large language models like Claude Desktop.
+一个用于搜索和下载学术论文的 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 服务器，支持多个学术平台。专为 Claude Desktop、Cursor 等 LLM 工具设计。
 
-![PyPI](https://img.shields.io/pypi/v/paper-search-mcp.svg) ![License](https://img.shields.io/badge/license-MIT-blue.svg) ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
-[![smithery badge](https://smithery.ai/badge/@openags/paper-search-mcp)](https://smithery.ai/server/@openags/paper-search-mcp)
-
----
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Installation](#installation)
-  - [Quick Start](#quick-start)
-    - [Install Package](#install-package)
-    - [Configure Claude Desktop](#configure-claude-desktop)
-  - [For Development](#for-development)
-    - [Setup Environment](#setup-environment)
-    - [Install Dependencies](#install-dependencies)
-- [Contributing](#contributing)
-- [Demo](#demo)
-- [License](#license)
-- [TODO](#todo)
+![License](https://img.shields.io/badge/license-MIT-blue.svg) ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
 
 ---
 
-## Overview
+## 支持的平台
 
-`paper-search-mcp` is a Python-based MCP server that enables users to search and download academic papers from various platforms. It provides tools for searching papers (e.g., `search_arxiv`) and downloading PDFs (e.g., `download_arxiv`), making it ideal for researchers and AI-driven workflows. Built with the MCP Python SDK, it integrates seamlessly with LLM clients like Claude Desktop.
+### 核心平台
+
+| 平台 | 搜索 | 下载 | 阅读 | 说明 |
+|------|:----:|:----:|:----:|------|
+| **arXiv** | ✅ | ✅ | ✅ | 预印本: 物理、数学、计算机、统计、生物、金融 |
+| **Semantic Scholar** | ✅ | ✅ | ✅ | 通用学术搜索，2亿+论文，AI驱动 |
+| **PubMed** | ✅ | ❌ | ❌ | 生物医学文献 |
+| **bioRxiv** | ✅ | ✅ | ✅ | 生物学预印本 |
+| **medRxiv** | ✅ | ✅ | ✅ | 医学预印本 |
+| **CrossRef** | ✅ | ❌ | ❌ | DOI 元数据，1.5亿+记录 |
+| **IACR** | ✅ | ✅ | ✅ | 密码学论文 |
+| **Google Scholar** | ✅ | ❌ | ❌ | 全学科搜索（网页抓取） |
+| **RePEc/IDEAS** | ✅ | ❌ | ❌ | 经济学论文库，450万+条目 |
+| **Sci-Hub** | ❌ | ✅ | ✅ | 下载 2023 年前的付费论文 |
+
+### RePEc/IDEAS 特色功能
+
+RePEc 是最大的开放经济学文献库，支持丰富的搜索选项：
+
+**搜索字段**: 全文 / 摘要 / 关键词 / 标题 / 作者
+
+**排序方式**: 相关性 / 最新 / 最早 / 被引次数 / 最新且相关
+
+**文档类型**: 期刊文章 / 工作论文 / 书籍章节 / 书籍
+
+**机构/期刊过滤**:
+| 类别 | 可选值 |
+|------|--------|
+| 研究机构 | `nber`, `imf`, `worldbank`, `ecb`, `bis`, `cepr`, `iza` |
+| 美联储 | `fed`, `fed_ny`, `fed_chicago`, `fed_stlouis`, `fed_sf` |
+| Top 5 期刊 | `aer`, `jpe`, `qje`, `econometrica`, `restud` |
+| 其他期刊 | `jfe`, `jme`, `aej_macro`, `aej_micro`, `aej_applied` |
 
 ---
 
-## Features
+## 快速开始
 
-- **Multi-Source Support**: Search and download papers from arXiv, PubMed, bioRxiv, medRxiv, Google Scholar, IACR ePrint Archive, Semantic Scholar.
-- **Standardized Output**: Papers are returned in a consistent dictionary format via the `Paper` class.
-- **Asynchronous Tools**: Efficiently handles network requests using `httpx`.
-- **MCP Integration**: Compatible with MCP clients for LLM context enhancement.
-- **Extensible Design**: Easily add new academic platforms by extending the `academic_platforms` module.
-
----
-
-## Installation
-
-`paper-search-mcp` can be installed using `uv` or `pip`. Below are two approaches: a quick start for immediate use and a detailed setup for development.
-
-### Installing via Smithery
-
-To install paper-search-mcp for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@openags/paper-search-mcp):
+### 安装
 
 ```bash
-npx -y @smithery/cli install @openags/paper-search-mcp --client claude
+# 使用 uv (推荐)
+uv add paper-search-mcp
+
+# 或使用 pip
+pip install paper-search-mcp
 ```
 
-### Quick Start
+### 配置 Claude Desktop
 
-For users who want to quickly run the server:
+编辑 `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
 
-1. **Install Package**:
+```json
+{
+  "mcpServers": {
+    "paper_search_server": {
+      "command": "uv",
+      "args": ["run", "-m", "paper_search_mcp.server"],
+      "env": {
+        "SEMANTIC_SCHOLAR_API_KEY": "",
+        "CROSSREF_MAILTO": "your_email@example.com",
+        "NCBI_API_KEY": ""
+      }
+    }
+  }
+}
+```
 
-   ```bash
-   uv add paper-search-mcp
-   ```
+### 配置 Cursor
 
-2. **Configure Claude Desktop**:
-   Add this configuration to `~/Library/Application Support/Claude/claude_desktop_config.json` (Mac) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
-   ```json
-   {
-     "mcpServers": {
-       "paper_search_server": {
-         "command": "uv",
-         "args": [
-           "run",
-           "--directory",
-           "/path/to/your/paper-search-mcp",
-           "-m",
-           "paper_search_mcp.server"
-         ],
-         "env": {
-           "SEMANTIC_SCHOLAR_API_KEY": "" // Optional: For enhanced Semantic Scholar features
-         }
-       }
-     }
-   }
-   ```
-   > Note: Replace `/path/to/your/paper-search-mcp` with your actual installation path.
-
-### For Development
-
-For developers who want to modify the code or contribute:
-
-1. **Setup Environment**:
-
-   ```bash
-   # Install uv if not installed
-   curl -LsSf https://astral.sh/uv/install.sh | sh
-
-   # Clone repository
-   git clone https://github.com/openags/paper-search-mcp.git
-   cd paper-search-mcp
-
-   # Create and activate virtual environment
-   uv venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   ```
-
-2. **Install Dependencies**:
-
-   ```bash
-   # Install project in editable mode
-   uv add -e .
-
-   # Add development dependencies (optional)
-   uv add pytest flake8
-   ```
+在 Cursor 设置中添加 MCP 服务器配置。
 
 ---
 
-## Contributing
+## 使用指南
 
-We welcome contributions! Here's how to get started:
+### 按学科选择工具
 
-1. **Fork the Repository**:
-   Click "Fork" on GitHub.
+```
+通用学术搜索      → search_semantic 或 search_crossref
+计算机/物理预印本  → search_arxiv
+生物医学          → search_pubmed + download_scihub(doi)
+经济学            → search_repec (支持 NBER, IMF, Fed, AER 等)
+密码学            → search_iacr
+下载付费论文       → download_scihub(doi) [2023年前]
+```
 
-2. **Clone and Set Up**:
+### 典型工作流
 
-   ```bash
-   git clone https://github.com/yourusername/paper-search-mcp.git
-   cd paper-search-mcp
-   pip install -e ".[dev]"  # Install dev dependencies (if added to pyproject.toml)
-   ```
+```python
+# 1. 搜索论文
+papers = search_semantic("climate change agriculture", max_results=5)
 
-3. **Make Changes**:
+# 2. 获取 DOI
+doi = papers[0]["doi"]
 
-   - Add new platforms in `academic_platforms/`.
-   - Update tests in `tests/`.
+# 3. 通过 Sci-Hub 下载 (旧论文)
+pdf_path = download_scihub(doi)
 
-4. **Submit a Pull Request**:
-   Push changes and create a PR on GitHub.
+# 4. 阅读全文
+text = read_scihub_paper(doi)
+```
 
----
+### RePEc 经济学搜索示例
 
-## Demo
+```python
+# 搜索 NBER 工作论文
+search_repec("inflation expectations", series='nber')
 
-<img src="docs\images\demo.png" alt="Demo" width="800">
+# 搜索 AER 期刊文章，按最新排序
+search_repec("causal inference", series='aer', sort_by='newest')
 
-## TODO
+# 搜索美联储论文，限定年份
+search_repec("monetary policy", series='fed', year_from=2020)
 
-### Planned Academic Platforms
+# 按作者搜索
+search_repec("Acemoglu", search_field='author')
 
-- [√] arXiv
-- [√] PubMed
-- [√] bioRxiv
-- [√] medRxiv
-- [√] Google Scholar
-- [√] IACR ePrint Archive
-- [√] Semantic Scholar
-- [ ] PubMed Central (PMC)
-- [ ] Science Direct
-- [ ] Springer Link
-- [ ] IEEE Xplore
-- [ ] ACM Digital Library
-- [ ] Web of Science
-- [ ] Scopus
-- [ ] JSTOR
-- [ ] ResearchGate
-- [ ] CORE
-- [ ] Microsoft Academic
+# 获取论文详情（包含完整摘要）
+get_repec_paper("https://ideas.repec.org/p/nbr/nberwo/32000.html")
+```
 
 ---
 
-## License
+## 完整工具列表
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+### 搜索工具
+
+| 工具 | 说明 |
+|------|------|
+| `search_arxiv` | 搜索 arXiv 预印本 |
+| `search_semantic` | Semantic Scholar 通用搜索 |
+| `search_crossref` | CrossRef DOI 元数据搜索 |
+| `search_pubmed` | PubMed 生物医学搜索 |
+| `search_biorxiv` | bioRxiv 生物学预印本 |
+| `search_medrxiv` | medRxiv 医学预印本 |
+| `search_iacr` | IACR 密码学论文 |
+| `search_google_scholar` | Google Scholar 搜索 |
+| `search_repec` | RePEc/IDEAS 经济学搜索 |
+
+### 下载工具
+
+| 工具 | 说明 |
+|------|------|
+| `download_arxiv` | 下载 arXiv PDF（免费） |
+| `download_semantic` | 下载开放获取论文 |
+| `download_biorxiv` | 下载 bioRxiv PDF |
+| `download_medrxiv` | 下载 medRxiv PDF |
+| `download_iacr` | 下载 IACR PDF |
+| `download_scihub` | 通过 Sci-Hub 下载 |
+
+### 阅读工具 (PDF → Markdown)
+
+| 工具 | 说明 |
+|------|------|
+| `read_arxiv_paper` | 阅读 arXiv 论文 |
+| `read_semantic_paper` | 阅读 Semantic Scholar 论文 |
+| `read_biorxiv_paper` | 阅读 bioRxiv 论文 |
+| `read_medrxiv_paper` | 阅读 medRxiv 论文 |
+| `read_iacr_paper` | 阅读 IACR 论文 |
+| `read_scihub_paper` | 阅读 Sci-Hub 下载的论文 |
+
+### 辅助工具
+
+| 工具 | 说明 |
+|------|------|
+| `get_repec_paper` | 获取 RePEc 论文详情（完整摘要） |
+| `get_crossref_paper_by_doi` | 通过 DOI 获取论文元数据 |
 
 ---
 
-Happy researching with `paper-search-mcp`! If you encounter issues, open a GitHub issue.
+## 环境变量
+
+| 变量 | 用途 | 推荐 |
+|------|------|:----:|
+| `SEMANTIC_SCHOLAR_API_KEY` | 提高 Semantic Scholar 请求限制 | ✅ |
+| `CROSSREF_MAILTO` | CrossRef 礼貌池访问 | ✅ |
+| `NCBI_API_KEY` | 提高 PubMed 请求限制 | 可选 |
+| `SCIHUB_MIRROR` | 自定义 Sci-Hub 镜像 | 可选 |
+
+---
+
+## 开发
+
+```bash
+# 克隆仓库
+git clone https://github.com/openags/paper-search-mcp.git
+cd paper-search-mcp
+
+# 创建虚拟环境
+uv venv && source .venv/bin/activate
+
+# 安装开发依赖
+uv pip install -e .
+
+# 运行测试
+uv run pytest tests/ -v
+```
+
+---
+
+## 许可证
+
+MIT License
+
+原始代码基于 [paper-search-mcp](https://github.com/openags/paper-search-mcp)  
+Copyright (c) 2025 OPENAGS
+
+修改和增强  
+Copyright (c) 2025 Haibo Lu
+
+---
+
+🎓 祝研究顺利！

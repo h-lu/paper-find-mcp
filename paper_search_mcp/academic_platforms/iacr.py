@@ -4,10 +4,11 @@ import requests
 from bs4 import BeautifulSoup
 import time
 import random
-from ..paper import Paper
-import logging
-from PyPDF2 import PdfReader
 import os
+import logging
+
+from ..paper import Paper
+import pymupdf4llm
 
 logger = logging.getLogger(__name__)
 
@@ -231,66 +232,51 @@ class IACRSearcher(PaperSource):
             return f"Error downloading PDF: {e}"
 
     def read_paper(self, paper_id: str, save_path: str = "./downloads") -> str:
-        """
-        Download and extract text from IACR paper PDF
+        """下载并提取 IACR 论文文本
 
+        使用 PyMuPDF4LLM 提取 Markdown 格式。
+        
         Args:
-            paper_id: IACR paper ID
-            save_path: Directory to save downloaded PDF
+            paper_id: IACR paper ID (e.g., "2009/101")
+            save_path: 保存目录
 
         Returns:
-            str: Extracted text from the PDF or error message
+            str: 提取的 Markdown 文本或错误信息
         """
         try:
-            # First get paper details to get the PDF URL
+            # 获取论文详情
             paper = self.get_paper_details(paper_id)
             if not paper or not paper.pdf_url:
                 return f"Error: Could not find PDF URL for paper {paper_id}"
 
-            # Download the PDF
+            # 下载 PDF
             pdf_response = requests.get(paper.pdf_url, timeout=30)
             pdf_response.raise_for_status()
 
-            # Create download directory if it doesn't exist
+            # 保存 PDF
             os.makedirs(save_path, exist_ok=True)
-
-            # Save the PDF
             filename = f"iacr_{paper_id.replace('/', '_')}.pdf"
             pdf_path = os.path.join(save_path, filename)
 
             with open(pdf_path, "wb") as f:
                 f.write(pdf_response.content)
 
-            # Extract text using PyPDF2
-            reader = PdfReader(pdf_path)
-            text = ""
-
-            for page_num, page in enumerate(reader.pages):
-                try:
-                    page_text = page.extract_text()
-                    if page_text:
-                        text += f"\n--- Page {page_num + 1} ---\n"
-                        text += page_text + "\n"
-                except Exception as e:
-                    logger.warning(
-                        f"Failed to extract text from page {page_num + 1}: {e}"
-                    )
-                    continue
+            # 使用 PyMuPDF4LLM 提取文本
+            text = pymupdf4llm.to_markdown(pdf_path, show_progress=False)
+            logger.info(f"Extracted {len(text)} characters from {pdf_path}")
 
             if not text.strip():
-                return (
-                    f"PDF downloaded to {pdf_path}, but unable to extract readable text"
-                )
+                return f"PDF downloaded to {pdf_path}, but no text could be extracted."
 
-            # Add paper metadata at the beginning
-            metadata = f"Title: {paper.title}\n"
-            metadata += f"Authors: {', '.join(paper.authors)}\n"
-            metadata += f"Published Date: {paper.published_date}\n"
-            metadata += f"URL: {paper.url}\n"
-            metadata += f"PDF downloaded to: {pdf_path}\n"
-            metadata += "=" * 80 + "\n\n"
+            # 添加元数据
+            metadata = f"# {paper.title}\n\n"
+            metadata += f"**Authors**: {', '.join(paper.authors)}\n"
+            metadata += f"**Published**: {paper.published_date}\n"
+            metadata += f"**URL**: {paper.url}\n"
+            metadata += f"**PDF**: {pdf_path}\n\n"
+            metadata += "---\n\n"
 
-            return metadata + text.strip()
+            return metadata + text
 
         except requests.RequestException as e:
             logger.error(f"Error downloading PDF: {e}")
