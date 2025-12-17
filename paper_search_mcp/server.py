@@ -189,12 +189,12 @@ async def search_arxiv(query: str, max_results: int = 10) -> List[Dict]:
 
 
 @mcp.tool()
-async def download_arxiv(paper_id: str, save_path: str = "./downloads") -> str:
+async def download_arxiv(paper_id: str, save_path: Optional[str] = None) -> str:
     """Download PDF from arXiv (always free and available).
     
     Args:
         paper_id: arXiv ID (e.g., '2106.12345', '2312.00001v2').
-        save_path: Directory to save PDF (default: './downloads').
+        save_path: Directory to save PDF (default: ~/paper_downloads).
     
     Returns:
         Path to downloaded PDF file.
@@ -206,12 +206,12 @@ async def download_arxiv(paper_id: str, save_path: str = "./downloads") -> str:
 
 
 @mcp.tool()
-async def read_arxiv_paper(paper_id: str, save_path: str = "./downloads") -> str:
+async def read_arxiv_paper(paper_id: str, save_path: Optional[str] = None) -> str:
     """Download and extract full text from arXiv paper as Markdown.
     
     Args:
         paper_id: arXiv ID (e.g., '2106.12345').
-        save_path: Directory to save PDF (default: './downloads').
+        save_path: Directory to save PDF (default: ~/paper_downloads).
     
     Returns:
         Full paper text in Markdown format.
@@ -258,7 +258,7 @@ async def search_pubmed(query: str, max_results: int = 10) -> List[Dict]:
 
 
 @mcp.tool()
-async def download_pubmed(paper_id: str, save_path: str = "./downloads") -> str:
+async def download_pubmed(paper_id: str, save_path: Optional[str] = None) -> str:
     """PubMed does NOT support direct PDF downloads.
     
     PubMed is a metadata database - it does not host PDFs.
@@ -278,7 +278,7 @@ async def download_pubmed(paper_id: str, save_path: str = "./downloads") -> str:
 
 
 @mcp.tool()
-async def read_pubmed_paper(paper_id: str, save_path: str = "./downloads") -> str:
+async def read_pubmed_paper(paper_id: str, save_path: Optional[str] = None) -> str:
     """PubMed does NOT support direct paper reading.
     
     INSTEAD: Use search_pubmed to get the DOI, then use read_scihub_paper(doi).
@@ -330,7 +330,7 @@ async def search_biorxiv(query: str, max_results: int = 10) -> List[Dict]:
 
 
 @mcp.tool()
-async def download_biorxiv(paper_id: str, save_path: str = "./downloads") -> str:
+async def download_biorxiv(paper_id: str, save_path: Optional[str] = None) -> str:
     """Download PDF from bioRxiv (free and open access).
     
     Args:
@@ -344,7 +344,7 @@ async def download_biorxiv(paper_id: str, save_path: str = "./downloads") -> str
 
 
 @mcp.tool()
-async def read_biorxiv_paper(paper_id: str, save_path: str = "./downloads") -> str:
+async def read_biorxiv_paper(paper_id: str, save_path: Optional[str] = None) -> str:
     """Download and extract full text from bioRxiv paper.
     
     Args:
@@ -394,7 +394,7 @@ async def search_medrxiv(query: str, max_results: int = 10) -> List[Dict]:
 
 
 @mcp.tool()
-async def download_medrxiv(paper_id: str, save_path: str = "./downloads") -> str:
+async def download_medrxiv(paper_id: str, save_path: Optional[str] = None) -> str:
     """Download PDF from medRxiv (free and open access).
     
     Args:
@@ -408,7 +408,7 @@ async def download_medrxiv(paper_id: str, save_path: str = "./downloads") -> str
 
 
 @mcp.tool()
-async def read_medrxiv_paper(paper_id: str, save_path: str = "./downloads") -> str:
+async def read_medrxiv_paper(paper_id: str, save_path: Optional[str] = None) -> str:
     """Download and extract full text from medRxiv paper.
     
     Args:
@@ -503,7 +503,7 @@ async def search_iacr(
 
 
 @mcp.tool()
-async def download_iacr(paper_id: str, save_path: str = "./downloads") -> str:
+async def download_iacr(paper_id: str, save_path: Optional[str] = None) -> str:
     """Download PDF from IACR ePrint (always free).
     
     Args:
@@ -520,7 +520,7 @@ async def download_iacr(paper_id: str, save_path: str = "./downloads") -> str:
 
 
 @mcp.tool()
-async def read_iacr_paper(paper_id: str, save_path: str = "./downloads") -> str:
+async def read_iacr_paper(paper_id: str, save_path: Optional[str] = None) -> str:
     """Download and extract full text from IACR paper.
     
     Args:
@@ -582,7 +582,7 @@ async def search_semantic(
 
 
 @mcp.tool()
-async def download_semantic(paper_id: str, save_path: str = "./downloads") -> str:
+async def download_semantic(paper_id: str, save_path: Optional[str] = None) -> str:
     """Download PDF via Semantic Scholar (if open-access available).
     
     Works for open-access papers only. If no PDF available,
@@ -606,7 +606,7 @@ async def download_semantic(paper_id: str, save_path: str = "./downloads") -> st
 
 
 @mcp.tool()
-async def read_semantic_paper(paper_id: str, save_path: str = "./downloads") -> str:
+async def read_semantic_paper(paper_id: str, save_path: Optional[str] = None) -> str:
     """Download and extract text from paper via Semantic Scholar.
     
     Works for open-access papers only.
@@ -691,7 +691,7 @@ async def get_crossref_paper_by_doi(doi: str) -> Dict:
 
 
 @mcp.tool()
-async def download_crossref(paper_id: str, save_path: str = "./downloads") -> str:
+async def download_crossref(paper_id: str, save_path: Optional[str] = None) -> str:
     """CrossRef does NOT support direct PDF downloads.
     
     CrossRef is a metadata/citation database only - it does not host PDFs.
@@ -712,7 +712,7 @@ async def download_crossref(paper_id: str, save_path: str = "./downloads") -> st
 
 
 @mcp.tool()
-async def read_crossref_paper(paper_id: str, save_path: str = "./downloads") -> str:
+async def read_crossref_paper(paper_id: str, save_path: Optional[str] = None) -> str:
     """CrossRef does NOT support direct paper reading.
     
     CrossRef provides metadata only, not full-text content.
@@ -823,7 +823,7 @@ async def search_repec(
 
 
 @mcp.tool()
-async def download_repec(paper_id: str, save_path: str = "./downloads") -> str:
+async def download_repec(paper_id: str, save_path: Optional[str] = None) -> str:
     """RePEc/IDEAS does NOT support direct PDF downloads.
     
     RePEc is a metadata index - PDFs are hosted at original institutions
@@ -845,7 +845,7 @@ async def download_repec(paper_id: str, save_path: str = "./downloads") -> str:
 
 
 @mcp.tool()
-async def read_repec_paper(paper_id: str, save_path: str = "./downloads") -> str:
+async def read_repec_paper(paper_id: str, save_path: Optional[str] = None) -> str:
     """RePEc/IDEAS does NOT support direct paper reading.
     
     INSTEAD:
@@ -900,7 +900,7 @@ async def get_repec_paper(url_or_handle: str) -> Dict:
 # Sci-Hub 工具（仅下载，不搜索）
 # ============================================================
 @mcp.tool()
-async def download_scihub(doi: str, save_path: str = "./downloads") -> str:
+async def download_scihub(doi: str, save_path: Optional[str] = None) -> str:
     """Download paper PDF via Sci-Hub using DOI (for older papers only).
     
     USE THIS TOOL WHEN:
@@ -913,7 +913,7 @@ async def download_scihub(doi: str, save_path: str = "./downloads") -> str:
     
     Args:
         doi: Paper DOI (e.g., '10.1038/nature12373', '10.1126/science.1234567').
-        save_path: Directory to save PDF (default: './downloads').
+        save_path: Directory to save PDF (default: ~/paper_downloads).
     
     Returns:
         Path to downloaded PDF file (e.g., 'downloads/scihub_10.1038_xxx.pdf'),
@@ -930,7 +930,7 @@ async def download_scihub(doi: str, save_path: str = "./downloads") -> str:
 
 
 @mcp.tool()
-async def read_scihub_paper(doi: str, save_path: str = "./downloads") -> str:
+async def read_scihub_paper(doi: str, save_path: Optional[str] = None) -> str:
     """Download and extract full text from paper via Sci-Hub (older papers only).
     
     USE THIS TOOL WHEN:
@@ -945,7 +945,7 @@ async def read_scihub_paper(doi: str, save_path: str = "./downloads") -> str:
     
     Args:
         doi: Paper DOI (e.g., '10.1038/nature12373').
-        save_path: Directory to save PDF (default: './downloads').
+        save_path: Directory to save PDF (default: ~/paper_downloads).
     
     Returns:
         Full paper text in Markdown format with metadata header,
