@@ -103,7 +103,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
   "mcpServers": {
     "paper_search_server": {
       "command": "python",
-      "args": ["-m", "paper_search_mcp.server"],
+      "args": ["-m", "paper_find_mcp.server"],
       "env": {
         "SEMANTIC_SCHOLAR_API_KEY": "",
         "CROSSREF_MAILTO": "your_email@example.com",
